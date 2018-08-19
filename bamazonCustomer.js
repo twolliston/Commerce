@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require('console.table');
+const chalk = require('chalk');
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -54,8 +55,6 @@ function displayInventory() {
         start();
     });
 
-
-
 }
 
 // function which prompts the user for what action they should take
@@ -69,11 +68,11 @@ function start() {
                 message: "What is the the ID of the product you would like to buy?.",
                 validate: function (value) {
                     if (value === 'quit') {
-                        console.log("\n" + "Goodbye, come again soon");
+                        console.log(chalk.cyan("\n" + "Goodbye, come again soon"));
                         process.exit(1);
                     }
                     if (value = null || value === "") {
-                        console.log("\n" + "Make a valid! entry or exit");
+                        console.log(chalk.red("\n" + "Make a valid! entry or exit"));
                         return false;
                     }
                     return true;
@@ -102,14 +101,10 @@ function start() {
             connection.query("SELECT * FROM products WHERE ?", [{ item_id: answer.item }], function (err, results) {
                 if (err) throw err;
 
-                // console.log(results);
-                // console.log(results[0].stock_quantity);
-                // console.log(parseInt(answer.qty));
-
                 if (results) {
                     // once you have the item, check if there is enough product on-hand to perform the purchase             
                     if (results[0].stock_quantity < parseInt(answer.qty)) {
-                        console.log("Insufficient quantity! for item " + parseInt(answer.item));
+                        console.log(chalk.red("Insufficient quantity! for item " + parseInt(answer.item)));
                     } else {
                         // bid was high enough, so update db, let the user know, and start over
                         var newQuantity = results[0].stock_quantity - parseInt(answer.qty);
@@ -125,7 +120,7 @@ function start() {
                             ],
                             function (error) {
                                 if (error) throw err;
-                                console.log("Order placed successfully!");
+                                console.log(chalk.green("Order placed successfully!"));
                                 displayInventory();
                             }
                         );
